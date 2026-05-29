@@ -1,0 +1,62 @@
+{
+  "name": "adjuro",
+  "version": "1.0.0",
+  "description": "Independent, offline-capable verifier for Adjuro Ed25519 receipts (JWS / RFC 8037). Verifies signatures locally — never trusts Adjuro's server for the answer.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Adjuro",
+  "homepage": "https://github.com/adjuro/sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adjuro/sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adjuro/sdk/issues"
+  },
+  "keywords": [
+    "adjuro",
+    "verifier",
+    "ed25519",
+    "eddsa",
+    "jws",
+    "jose",
+    "rfc8037",
+    "receipt",
+    "tcpa",
+    "compliance",
+    "attestation"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "bun test",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "dependencies": {
+    "jose": "^6.2.3"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "^6.0.3"
+  }
+}

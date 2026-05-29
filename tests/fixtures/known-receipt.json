@@ -1,0 +1,54 @@
+{
+  "_meta": {
+    "description": "Anti-drift fixture. `jws` was signed with a throwaway Ed25519 key (NOT the production adjuro-root key). `expected` is the EXACT object the server's verifyReceiptJws() (adjuro/src/lib/verify.ts) returned for this jws with an in-memory jwkLookup and no revocation. The SDK must reproduce `expected` for the same input.",
+    "generated_by": "adjuro-sdk/tools/gen-fixture.mjs",
+    "server_source": "adjuro/src/lib/verify.ts :: verifyReceiptJws",
+    "jose_version": "6.2.3",
+    "fixture_kid": "adjuro-root-sample",
+    "note": "Fixed far-future exp (2100) so the receipt never expires; checkRevocation:false reproduces this exactly offline."
+  },
+  "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFkanVyby1yb290LXNhbXBsZSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkanVyby5haSIsImp0aSI6ImFkal9yY3B0X3g5azJ0cXA0ZjdhM3cxbjViOGMyZDZlMyIsImlhdCI6MTc0NzAwMDAwMCwiZXhwIjo0MTAyNDQ0ODAwLCJpc3N1ZWRfYnkiOiJodHRwczovL2FkanVyby5haSIsInJlY2VpcHRfaWQiOiJhZGpfcmNwdF94OWsydHFwNGY3YTN3MW41YjhjMmQ2ZTMiLCJpc3N1ZWRfYXQiOiIyMDI1LTA1LTExVDIxOjQ2OjQwLjAwMFoiLCJleHBpcmVzX2F0IjoiMjEwMC0wMS0wMVQwMDowMDowMC4wMDBaIiwidGVuYW50X2lkIjoiYWNtZS1jb2xsZWN0aW9ucy1taWQtYXRsYW50aWMiLCJ0cnVzdF9yb290X2lkIjoiYWRqdXJvLXJvb3QtMjAyNncyMCIsImFnZW50X2lkIjoiYWRqOjdrOW4ycDRmOG0xcTV3M3I2dDJ5OHU0aSIsImJyYW5kIjoiQWNtZSBDb2xsZWN0aW9ucyIsImV2ZW50X3R5cGUiOiJ2b2ljZV9jYWxsIiwiY2FsbGVyX251bWJlciI6IisxODAwNTU1MTIxMiIsImNhbGxlZV9oYXNoIjoic2hhMjU2LWhtYWM6YThqMWJ6czljNXkydjdtNnA0bjNmOGQyIiwiY2FtcGFpZ25faWQiOiJhY2N0LXJlY292ZXJ5LXEyLTIwMjYiLCJjb25zZW50X2lkIjoiY3JtLTEyODQ3LWNvbnNlbnQtMjAyNi0wMy0xNCIsInNjb3BlIjpbImRlYnRfY29sbGVjdGlvbiJdLCJqdXJpc2RpY3Rpb24iOiJVUy1DQSIsIm5vbmNlIjoiYTFiMmMzZDRlNWY2MDcxOCJ9.KoWG2TbXtYOC3yJ_w4e8KdHFEaNTAzN2EzqK-MHcuAy03OxjHml4uLbu_ur7gfylykomlTsfVBuEM-8EMJpkCQ",
+  "jwks": {
+    "keys": [
+      {
+        "crv": "Ed25519",
+        "kty": "OKP",
+        "x": "3P1tOi5VmTDW3DWi6jNQfC7ARL76Zos8j_f8RN4x_DA",
+        "kid": "adjuro-root-sample",
+        "alg": "EdDSA",
+        "use": "sig"
+      }
+    ]
+  },
+  "expected": {
+    "valid": true,
+    "kid": "adjuro-root-sample",
+    "receipt_id": "adj_rcpt_x9k2tqp4f7a3w1n5b8c2d6e3",
+    "issued_at": "2025-05-11T21:46:40.000Z",
+    "expires_at": "2100-01-01T00:00:00.000Z",
+    "payload": {
+      "iss": "https://adjuro.ai",
+      "jti": "adj_rcpt_x9k2tqp4f7a3w1n5b8c2d6e3",
+      "iat": 1747000000,
+      "exp": 4102444800,
+      "issued_by": "https://adjuro.ai",
+      "receipt_id": "adj_rcpt_x9k2tqp4f7a3w1n5b8c2d6e3",
+      "issued_at": "2025-05-11T21:46:40.000Z",
+      "expires_at": "2100-01-01T00:00:00.000Z",
+      "tenant_id": "acme-collections-mid-atlantic",
+      "trust_root_id": "adjuro-root-2026w20",
+      "agent_id": "adj:7k9n2p4f8m1q5w3r6t2y8u4i",
+      "brand": "Acme Collections",
+      "event_type": "voice_call",
+      "caller_number": "+18005551212",
+      "callee_hash": "sha256-hmac:a8j1bzs9c5y2v7m6p4n3f8d2",
+      "campaign_id": "acct-recovery-q2-2026",
+      "consent_id": "crm-12847-consent-2026-03-14",
+      "scope": [
+        "debt_collection"
+      ],
+      "jurisdiction": "US-CA",
+      "nonce": "a1b2c3d4e5f60718"
+    }
+  }
+}
