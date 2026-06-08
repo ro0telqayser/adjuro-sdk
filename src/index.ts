@@ -18,7 +18,9 @@ import type { JWK } from "jose";
 import { verifyCore } from "./core.js";
 import { fetchJwks } from "./jwks.js";
 import { checkRevocation } from "./revocation.js";
+import { verifyTransparencyLogInclusion } from "./transparency.js";
 import type { JWKSet, VerifyOptions, VerifyReason, VerifyResult } from "./types.js";
+import type { TransparencyLogVerifyReason } from "./transparency-types.js";
 
 const DEFAULT_BASE_URL = "https://api.adjuro.ai";
 
@@ -30,6 +32,21 @@ export const VERIFY_REASONS: readonly VerifyReason[] = [
   "signature_invalid",
   "expired",
   "revoked",
+] as const;
+
+/** The full set of transparency-log verification failure reasons. */
+export const TRANSPARENCY_LOG_VERIFY_REASONS: readonly TransparencyLogVerifyReason[] = [
+  "malformed_jws",
+  "malformed_receipt_claims",
+  "malformed_proof",
+  "malformed_snapshot",
+  "receipt_proof_mismatch",
+  "proof_snapshot_mismatch",
+  "invalid_audit_path",
+  "root_mismatch",
+  "invalid_snapshot_key",
+  "snapshot_key_mismatch",
+  "snapshot_signature_invalid",
 ] as const;
 
 /**
@@ -82,3 +99,13 @@ export async function verifyReceipt(jws: string, opts: VerifyOptions = {}): Prom
 }
 
 export type { VerifyResult, VerifyReason, VerifyOptions, JWKSet } from "./types.js";
+export { verifyTransparencyLogInclusion };
+export type {
+  SnapshotSigningJwk,
+  TransparencyLogInclusionFailure,
+  TransparencyLogInclusionProof,
+  TransparencyLogInclusionResult,
+  TransparencyLogInclusionSuccess,
+  TransparencyLogSnapshot,
+  TransparencyLogVerifyReason,
+} from "./transparency-types.js";
