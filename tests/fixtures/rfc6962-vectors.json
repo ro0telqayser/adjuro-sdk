@@ -1,0 +1,75 @@
+{
+  "_meta": {
+    "description": "Known-answer vectors from Google Certificate Transparency's RFC 6962 Merkle tests.",
+    "normative_source": "https://www.rfc-editor.org/rfc/rfc6962#section-2.1",
+    "source_url": "https://raw.githubusercontent.com/google/certificate-transparency/0fe5116f42890853e9fcf5120f1f5129d64f64ea/python/ct/crypto/merkle_test.py",
+    "source_commit": "0fe5116f42890853e9fcf5120f1f5129d64f64ea",
+    "source_git_blob_sha": "a7190477759808de4e8d8500861f2e1a912db065",
+    "source_sha256": "dd7e213247b60728e7bb1e00477ea3dc8c7da53fcf0d66a6e57ae8c102466e2b"
+  },
+  "leaf_hashes": [
+    {
+      "data_hex": "",
+      "hash_hex": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "data_hex": "101112131415161718191a1b1c1d1e1f",
+      "hash_hex": "3bfb960453ebaebf33727da7a1f4db38acc051d381b6da20d6d4e88f0eabfd7a"
+    }
+  ],
+  "node_hash": {
+    "left_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "right_hex": "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+    "hash_hex": "1a378704c17da31e2d05b6d121c2bb2c7d76f6ee6fa8f983e596c2d034963c57"
+  },
+  "tree_leaves_hex": [
+    "",
+    "00",
+    "10",
+    "2021",
+    "3031",
+    "40414243",
+    "5051525354555657",
+    "606162636465666768696a6b6c6d6e6f"
+  ],
+  "tree_roots_hex": [
+    "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d",
+    "fac54203e7cc696cf0dfcb42c92a1d9dbaf70ad9e621f4bd8d98662f00e3c125",
+    "aeb6bcfe274b70a14fb067a5e5578264db0fa9b51af5e0ba159158f329e06e77",
+    "d37ee418976dd95753c1c73862b9398fa2a2cf9b4ff0fdfe8b30cd95209614b7",
+    "4e3bbb1f7b478dcfe71fb631631519a3bca12c9aefca1612bfce4c13a86264d4",
+    "76e67dadbcdf1e10e1b74ddc608abd2f98dfb16fbce75277b5232a127f2087ef",
+    "ddb89be403809e325750d3d263cd78929c2942b7942a34b77e122c9594a74c8c",
+    "5dc9da79a70659a9ad559cb701ded9a2ab9d823aad2f4960cfe370eff4604328"
+  ],
+  "inclusion": {
+    "leaf_hash_hex": "7a395c866d5ecdb0cccb623e011dbc392cd348d1d1d72776174e127a24b09c78",
+    "leaf_index": 848049,
+    "tree_size": 3630887,
+    "root_hash_hex": "78316a05c9bcf14a3a4548f5b854a9adfcd46a4c034401b3ce7eb7ac2f1d0ecb",
+    "audit_path_hex": [
+      "1a208aeebcd1b39fe2de247ee8db9454e1e93a312d206b87f6ca9cc6ec6f1ddd",
+      "0a1b78b383f580856f433c01a5741e160d451c185910027f6cc9f828687a40c4",
+      "3d1745789bc63f2da15850de1c12a5bf46ed81e1cc90f086148b1662e79aab3d",
+      "9095b61e14d8990acf390905621e62b1714fb8e399fbb71de5510e0aef45affe",
+      "0a332b91b8fab564e6afd1dd452449e04619b18accc0ff9aa8393cd4928451f2",
+      "2336f0181d264aed6d8f3a6507ca14a8d3b3c3a23791ac263e845d208c1ee330",
+      "b4ce56e300590500360c146c6452edbede25d4ed83919278749ee5dbe178e048",
+      "933f6ddc848ea562e4f9c5cfb5f176941301dad0c6fdb9d1fbbe34fac1be6966",
+      "b95a6222958a86f74c030be27c44f57dbe313e5e7c7f4ffb98bcbd3a03bb52f2",
+      "daeeb3ce5923defd0faeb8e0c210b753b85b809445d7d3d3cd537a9aabaa9c45",
+      "7fadd0a13e9138a2aa6c3fdec4e2275af233b94812784f66bcca9aa8e989f2bc",
+      "1864e6ba3e32878610546539734fb5eeae2529991f130c575c73a7e25a2a7c56",
+      "12842d1202b1dc6828a17ab253c02e7ce9409b5192430feba44189f39cc02d66",
+      "29af64b16fa3053c13d02ac63aa75b23aa468506e44c3a2315edc85d2dc22b11",
+      "b527b99934a0bd9edd154e449b0502e2c499bba783f3bc3dfe23364b6b532009",
+      "4584db8ae8e351ace08e01f306378a92bfd43611714814f3d834a2842d69faa8",
+      "86a9a41573b0d6e4292f01e93243d6cc65b30f06606fc6fa57390e7e90ed580f",
+      "a88b98fbe84d4c6aae8db9d1605dfac059d9f03fe0fcb0d5dff1295dacba09e6",
+      "06326dc617a6d1f7021dc536026dbfd5fffc6f7c5531d48ef6ccd1ed1569f2a1",
+      "f41fe8fdc3a2e4e8345e30216e7ebecffee26ff266eeced208a6c2a3cf08f960",
+      "40cf5bde8abb76983f3e98ba97aa36240402975674e120f234b3448911090f8d",
+      "b3222dc8658538079883d980d7fdc2bef9285344ea34338968f736b04aeb387a"
+    ]
+  }
+}

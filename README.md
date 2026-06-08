@@ -87,6 +87,78 @@ interface VerifyResult {
 
 The exact failure-reason set is also exported at runtime as `VERIFY_REASONS`.
 
+## Transparency-log inclusion
+
+`verifyTransparencyLogInclusion` independently proves that the canonical data in a receipt JWS is
+included in an RFC 6962 Merkle root authenticated by a caller-pinned snapshot key.
+
+```ts
+import {
+  verifyReceipt,
+  verifyTransparencyLogInclusion,
+} from "adjuro";
+
+// Fetch proof + snapshot from the public log, but pin the snapshot key yourself.
+const receiptResult = await verifyReceipt(receiptJws, {
+  jwks: pinnedReceiptJwks,
+  checkRevocation: false,
+});
+const inclusionResult = await verifyTransparencyLogInclusion(
+  receiptJws,
+  proof,
+  snapshot,
+  pinnedSnapshotJwk,
+);
+
+if (receiptResult.valid && inclusionResult.valid) {
+  console.log("authentic receipt included in authenticated root", inclusionResult.root_hash);
+}
+```
+
+The inclusion verifier derives all committed receipt data from the compact JWS:
+
+```text
+<receipt_id>|<protected-header kid>|<numeric iat>|<tenant_id>
+```
+
+It never trusts `proof.leaf`, `proof.leaf_hash`, or `snapshot.signing_key_jwk`. It computes:
+
+```text
+leaf = SHA-256(0x00 || UTF8(canonical_leaf))
+node = SHA-256(0x01 || left || right)
+```
+
+It then checks the audit-path geometry, index, tree size, proof/snapshot agreement, root, and the
+Ed25519 signature over the raw 32-byte root.
+
+### Snapshot trust boundary
+
+The current snapshot signature covers **only the raw Merkle root bytes**:
+
+- **Cryptographically authenticated:** `root_hash`.
+- **Consistency-checked only, not signed:** `snapshot_id`, `tree_size`, and `snapshot_kid`.
+
+The proof and snapshot must agree on ID, size, and root, and the snapshot kid must agree with the
+caller-pinned JWK. Those checks detect inconsistent inputs but do not turn that metadata into signed
+data. Do not represent the complete snapshot object as cryptographically signed.
+
+Receipt authenticity is a separate property. `verifyTransparencyLogInclusion` parses the JWS to
+derive the committed leaf but does not verify that JWS signature; call `verifyReceipt` as shown
+above when both authenticity and inclusion are required.
+
+```ts
+verifyTransparencyLogInclusion(
+  receiptJws: string,
+  proof: TransparencyLogInclusionProof,
+  snapshot: TransparencyLogSnapshot,
+  snapshotJwk: SnapshotSigningJwk,
+): Promise<TransparencyLogInclusionResult>
+```
+
+The pinned JWK must be an Ed25519 public key with matching `kid`, a 32-byte base64url `x`, and
+compatible `alg`, `use`, and `key_ops` values when those optional fields are present. Failure reasons
+are exported at runtime as `TRANSPARENCY_LOG_VERIFY_REASONS`.
+
 ### Examples
 
 ```js
@@ -106,6 +178,8 @@ await verifyReceipt(jws, { baseUrl: "https://api.staging.adjuro.ai" });
 
 ## How it works
 
+Receipt signature verification:
+
 1. Parse the JWS header → read the `kid` and confirm `alg` is `EdDSA` (RFC 8037 / pure Ed25519).
 2. Resolve the public key: use the `jwks` you passed, or fetch `${baseUrl}/.well-known/jwks.json`
    (cached for 5 minutes, matching the endpoint's `Cache-Control`).
@@ -116,6 +190,12 @@ await verifyReceipt(jws, { baseUrl: "https://api.staging.adjuro.ai" });
 
 The verification core is a faithful port of Adjuro's server-side verifier; a committed test fixture
 pins the SDK's output to the exact result the server produces for the same input.
+
+Transparency-log verification is intentionally independent of Adjuro's Merkle implementation. Its
+known-answer tests are pinned to
+[RFC 6962 §2.1](https://www.rfc-editor.org/rfc/rfc6962#section-2.1) and Google Certificate
+Transparency's published Merkle vectors at commit
+[`0fe5116f42890853e9fcf5120f1f5129d64f64ea`](https://github.com/google/certificate-transparency/blob/0fe5116f42890853e9fcf5120f1f5129d64f64ea/python/ct/crypto/merkle_test.py).
 
 ## Requirements
 
