@@ -1,6 +1,6 @@
 {
   "name": "adjuro",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Independent, offline-capable verifier for Adjuro Ed25519 receipts (JWS / RFC 8037). Verifies signatures locally — never trusts Adjuro's server for the answer.",
   "type": "module",
   "license": "Apache-2.0",
