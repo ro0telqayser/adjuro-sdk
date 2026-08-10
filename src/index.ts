@@ -32,6 +32,10 @@ export const VERIFY_REASONS: readonly VerifyReason[] = [
   "signature_invalid",
   "expired",
   "revoked",
+  "malformed_chain",
+  "parent_not_found",
+  "parent_revoked",
+  "parent_tenant_mismatch",
 ] as const;
 
 /** The full set of transparency-log verification failure reasons. */
@@ -48,6 +52,9 @@ export const TRANSPARENCY_LOG_VERIFY_REASONS: readonly TransparencyLogVerifyReas
   "snapshot_key_mismatch",
   "snapshot_signature_invalid",
 ] as const;
+
+/** Discriminator for the second signed leg. Mirrors the server's verify.ts. */
+const SETTLEMENT_EVENT_TYPE = "call_settlement";
 
 /**
  * Verify an Adjuro receipt JWS.
@@ -92,6 +99,69 @@ export async function verifyReceipt(jws: string, opts: VerifyOptions = {}): Prom
           revoked: true,
         };
       }
+    }
+  }
+
+  if (!result.valid) return result;
+
+  // ── Chain validation — settlement receipts ONLY ────────────────────────────
+  // A settlement receipt's signature proves Adjuro issued it, but the artifact's
+  // claim is RELATIONAL: "this call was placed by the agent that consent record X
+  // authorized". A valid signature over a dangling, revoked, or cross-tenant
+  // parent asserts a binding that does not exist. Gated on event_type so mint
+  // verification is completely untouched.
+  if (result.payload?.event_type === SETTLEMENT_EVENT_TYPE) {
+    const parentJti = result.payload.parent_jti;
+    // Distinct from parent_not_found: this receipt never named a parent at all,
+    // which is a defect in the artifact rather than a failure to resolve it.
+    if (typeof parentJti !== "string" || parentJti.length === 0) {
+      return { valid: false, reason: "malformed_chain", kid: result.kid, payload: result.payload };
+    }
+    if (!opts.parentJws) {
+      return { valid: false, reason: "parent_not_found", kid: result.kid, payload: result.payload };
+    }
+
+    // VERIFY the parent — do not merely decode it. The server resolves the parent
+    // from its own trusted database row; the SDK is handed bytes by the caller,
+    // who may be the adversary. Decoding without verifying would let anyone mint a
+    // plausible-looking parent and make ANY settlement receipt verify, which would
+    // make this whole block decorative.
+    //
+    // `parentJws: undefined` on the recursive call bounds the recursion at one
+    // level. A mint receipt carries no `event_type: "call_settlement"` so it never
+    // re-enters this branch, but the depth is pinned explicitly rather than left
+    // to depend on that.
+    const parent = await verifyReceipt(opts.parentJws, { ...opts, parentJws: undefined });
+    if (!parent.valid) {
+      return {
+        valid: false,
+        // A revoked parent gets its own verdict. If the settlement leg survived
+        // its parent's revocation, withdrawing consent would be defeated by
+        // pointing at the settlement receipt instead of the mint receipt.
+        reason: parent.reason === "revoked" ? "parent_revoked" : "parent_not_found",
+        kid: result.kid,
+        payload: result.payload,
+      };
+    }
+
+    // The verified parent must be the one this receipt actually names, otherwise a
+    // genuine parent for an unrelated call would satisfy the chain.
+    if (parent.payload?.jti !== parentJti) {
+      return { valid: false, reason: "parent_not_found", kid: result.kid, payload: result.payload };
+    }
+
+    // Without this a settlement receipt could name ANOTHER tenant's mint receipt
+    // and inherit the authorization that receipt carries.
+    if (
+      typeof result.payload.tenant_id === "string" &&
+      parent.payload?.tenant_id !== result.payload.tenant_id
+    ) {
+      return {
+        valid: false,
+        reason: "parent_tenant_mismatch",
+        kid: result.kid,
+        payload: result.payload,
+      };
     }
   }
 

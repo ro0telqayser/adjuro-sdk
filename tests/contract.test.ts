@@ -39,6 +39,14 @@ const RECEIPT_CLAIMS = [
   "nonce",
 ].sort();
 
+// WIDENED deliberately in 1.4.0 for settlement-chain verification. The four
+// `parent_*`/`malformed_chain` members apply ONLY to settlement receipts
+// (`event_type: "call_settlement"`); mint-receipt verification is unchanged, which
+// the "a MINT receipt never enters the chain path" test pins independently.
+//
+// This list must stay identical to the SERVER's union in src/lib/verify.ts — both
+// are published contracts, so drift means the SDK and the API disagree about the
+// same artifact. Adding a member here without adding it there is a bug.
 const REASONS = [
   "malformed_jws",
   "alg_unsupported",
@@ -46,6 +54,10 @@ const REASONS = [
   "signature_invalid",
   "expired",
   "revoked",
+  "malformed_chain",
+  "parent_not_found",
+  "parent_revoked",
+  "parent_tenant_mismatch",
 ].sort();
 
 test("CONTRACT: a valid VerifyResult has exactly the server's success keys", async () => {

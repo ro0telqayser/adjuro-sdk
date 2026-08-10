@@ -68,6 +68,7 @@ verifyReceipt(jws: string, opts?: {
   baseUrl?: string;          // default "https://api.adjuro.ai"
   checkRevocation?: boolean; // default true
   jwks?: JWKSet;             // pre-fetched keys → skip the JWKS fetch
+  parentJws?: string;        // REQUIRED for settlement receipts — see below
 }): Promise<VerifyResult>
 ```
 
@@ -75,7 +76,9 @@ verifyReceipt(jws: string, opts?: {
 interface VerifyResult {
   valid: boolean;
   reason?: "malformed_jws" | "alg_unsupported" | "unknown_kid"
-         | "signature_invalid" | "expired" | "revoked";
+         | "signature_invalid" | "expired" | "revoked"
+         | "malformed_chain" | "parent_not_found"
+         | "parent_revoked" | "parent_tenant_mismatch";
   kid?: string;          // signing key id (present once the header parsed)
   receipt_id?: string;   // the adj_rcpt_* id; equals the jti claim
   issued_at?: string;    // ISO-8601
@@ -86,6 +89,51 @@ interface VerifyResult {
 ```
 
 The exact failure-reason set is also exported at runtime as `VERIFY_REASONS`.
+
+## Settlement receipts — verifying the two-leg chain
+
+A voice call produces **two** signed receipts. The **mint** receipt seals *before* the
+call is placed, so it cannot carry the call id or the recording. The **settlement**
+receipt (`event_type: "call_settlement"`) seals *after* and chains back to it via
+`parent_jti`.
+
+A settlement receipt's claim is **relational** — *"this call was placed by the agent
+that consent record X authorized."* A valid signature over a dangling, revoked, or
+cross-tenant parent asserts a binding that does not exist, so the parent must be
+supplied and is checked:
+
+```ts
+// An adjuro-audit-packet/2 ZIP ships BOTH .jws files — you already have the parent.
+const result = await verifyReceipt(settlementJws, {
+  parentJws: mintJws,
+  jwks,
+  checkRevocation: false,   // fully offline
+});
+```
+
+The parent is **passed in, never fetched.** Fetching it would put a network round-trip
+and renewed trust in Adjuro's servers back into the one code path whose entire purpose
+is to need neither.
+
+**Its signature is verified, not merely decoded.** The parent arrives from the caller,
+who may be the adversary — decoding without verifying would let anyone forge a parent
+and make any settlement receipt verify.
+
+| `reason` | What it means |
+|---|---|
+| `malformed_chain` | The receipt declares `call_settlement` but names no `parent_jti`. A defect in the artifact itself. |
+| `parent_not_found` | No parent supplied, or the supplied parent fails verification / isn't the one named. |
+| `parent_revoked` | The parent was withdrawn. The leg it authorized falls with it — otherwise revoking consent would be defeated by pointing at the settlement receipt instead. |
+| `parent_tenant_mismatch` | The chain crosses tenants. |
+
+**Two honest boundaries.** In fully-offline mode (`checkRevocation: false`) revocation
+cannot be known — for the receipt *or its parent* — so `parent_revoked` is unreachable
+there. And a `recording_sha256` of `null` is **normal**, not a failure: unanswered calls
+and voicemail seal without a recording, and the receipt still binds the call id and
+ended reason. The digest is an enrichment, not a precondition.
+
+Mint-receipt verification is completely unchanged — the chain path is gated on
+`event_type`, pinned by a test asserting a mint receipt never reads `parentJws`.
 
 ## Transparency-log inclusion
 

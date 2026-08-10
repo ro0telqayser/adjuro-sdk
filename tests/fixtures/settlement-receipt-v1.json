@@ -1,0 +1,59 @@
+[
+  {
+    "name": "baseline — completed call with a customer-supplied recording digest",
+    "input": {
+      "settlementReceiptId": "adj_stl_7k9n2p4f8w1x3v5t6r0q2m4j6h8g0d2b4a6c8e0f2h4",
+      "parentReceiptId": "adj_rcpt_x9k2tqp4f7a3w1n5b8d0e2g4j6m8p0r2t4v6x8z0a2c4",
+      "tenantId": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+      "agentId": "adj:7k9n2p4f8w1x3v5t6r0q2m4j6h8g0d2b4a6c8e0f2h4j6",
+      "consentId": "crm-consent-88213",
+      "vapiCallId": "c1f8e2a4-9b3d-4c5e-8f7a-1b2c3d4e5f60",
+      "endedReason": "customer-ended-call",
+      "settlementStatus": "completed",
+      "recordingSha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "recordingSource": "customer_supplied",
+      "settledAt": "2026-08-05T14:22:31.000Z"
+    },
+    "version": "adjuro-settlement-receipt/1",
+    "preimage": "{\"iss\":\"https://adjuro.ai\",\"jti\":\"adj_stl_7k9n2p4f8w1x3v5t6r0q2m4j6h8g0d2b4a6c8e0f2h4\",\"iat\":1785939751,\"issued_by\":\"https://adjuro.ai\",\"settlement_receipt_id\":\"adj_stl_7k9n2p4f8w1x3v5t6r0q2m4j6h8g0d2b4a6c8e0f2h4\",\"settled_at\":\"2026-08-05T14:22:31.000Z\",\"parent_jti\":\"adj_rcpt_x9k2tqp4f7a3w1n5b8d0e2g4j6m8p0r2t4v6x8z0a2c4\",\"parent_receipt_id\":\"adj_rcpt_x9k2tqp4f7a3w1n5b8d0e2g4j6m8p0r2t4v6x8z0a2c4\",\"event_type\":\"call_settlement\",\"tenant_id\":\"3f2504e0-4f89-11d3-9a0c-0305e82c3301\",\"trust_root_id\":\"adjuro-root\",\"agent_id\":\"adj:7k9n2p4f8w1x3v5t6r0q2m4j6h8g0d2b4a6c8e0f2h4j6\",\"consent_id\":\"crm-consent-88213\",\"vapi_call_id\":\"c1f8e2a4-9b3d-4c5e-8f7a-1b2c3d4e5f60\",\"ended_reason\":\"customer-ended-call\",\"settlement_status\":\"completed\",\"recording_sha256\":\"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08\",\"recording_source\":\"customer_supplied\"}",
+    "hash": "333e313363335e319b2676af40d8ac5654e8f321e3e22d0aabe8292e98c4bb11"
+  },
+  {
+    "name": "uppercase digest is lowercased in the signed bytes",
+    "input": {
+      "settlementReceiptId": "adj_stl_0a2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4",
+      "parentReceiptId": "adj_rcpt_2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6",
+      "tenantId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "agentId": "adj:2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6",
+      "consentId": "crm-consent-00417",
+      "vapiCallId": "d2e9f3b5-0c4e-5d6f-9a8b-2c3d4e5f6071",
+      "endedReason": "assistant-ended-call",
+      "settlementStatus": "completed",
+      "recordingSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "recordingSource": "customer_supplied",
+      "settledAt": "2026-08-05T09:00:00.000Z"
+    },
+    "version": "adjuro-settlement-receipt/1",
+    "preimage": "{\"iss\":\"https://adjuro.ai\",\"jti\":\"adj_stl_0a2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4\",\"iat\":1785920400,\"issued_by\":\"https://adjuro.ai\",\"settlement_receipt_id\":\"adj_stl_0a2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4\",\"settled_at\":\"2026-08-05T09:00:00.000Z\",\"parent_jti\":\"adj_rcpt_2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6\",\"parent_receipt_id\":\"adj_rcpt_2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6\",\"event_type\":\"call_settlement\",\"tenant_id\":\"6ba7b810-9dad-11d1-80b4-00c04fd430c8\",\"trust_root_id\":\"adjuro-root\",\"agent_id\":\"adj:2c4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6\",\"consent_id\":\"crm-consent-00417\",\"vapi_call_id\":\"d2e9f3b5-0c4e-5d6f-9a8b-2c3d4e5f6071\",\"ended_reason\":\"assistant-ended-call\",\"settlement_status\":\"completed\",\"recording_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"recording_source\":\"customer_supplied\"}",
+    "hash": "423f0481b29adb90d8e73e7fe477a4efc860c4a14f62c545cea0a82ad170ffba"
+  },
+  {
+    "name": "unanswered call — no recording, null consent, expired settlement",
+    "input": {
+      "settlementReceiptId": "adj_stl_4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8",
+      "parentReceiptId": "adj_rcpt_6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8c0",
+      "tenantId": "886313e1-3b8a-5372-9b90-0c9aee199e5d",
+      "agentId": "adj:6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8c0",
+      "consentId": null,
+      "vapiCallId": "e3f0a4c6-1d5f-6e70-ab9c-3d4e5f607182",
+      "endedReason": "voicemail",
+      "settlementStatus": "expired",
+      "recordingSha256": null,
+      "recordingSource": null,
+      "settledAt": "2026-03-15T07:30:00.000Z"
+    },
+    "version": "adjuro-settlement-receipt/1",
+    "preimage": "{\"iss\":\"https://adjuro.ai\",\"jti\":\"adj_stl_4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8\",\"iat\":1773559800,\"issued_by\":\"https://adjuro.ai\",\"settlement_receipt_id\":\"adj_stl_4e6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8\",\"settled_at\":\"2026-03-15T07:30:00.000Z\",\"parent_jti\":\"adj_rcpt_6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8c0\",\"parent_receipt_id\":\"adj_rcpt_6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8c0\",\"event_type\":\"call_settlement\",\"tenant_id\":\"886313e1-3b8a-5372-9b90-0c9aee199e5d\",\"trust_root_id\":\"adjuro-root\",\"agent_id\":\"adj:6g8j0m2p4r6t8v0x2z4b6d8f0h2k4n6q8s0u2w4y6a8c0\",\"consent_id\":null,\"vapi_call_id\":\"e3f0a4c6-1d5f-6e70-ab9c-3d4e5f607182\",\"ended_reason\":\"voicemail\",\"settlement_status\":\"expired\",\"recording_sha256\":null,\"recording_source\":null}",
+    "hash": "73dcda000da2587c8af07ae57abd820e33e09a659ba064babf206216ce8c20c0"
+  }
+]

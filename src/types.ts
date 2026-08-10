@@ -20,7 +20,20 @@ export type VerifyReason =
   | "unknown_kid"
   | "signature_invalid"
   | "expired"
-  | "revoked";
+  | "revoked"
+  // The four below apply ONLY to settlement receipts (`event_type:
+  // "call_settlement"`). Mint-receipt verification is byte-for-byte unchanged.
+  // This set MUST stay identical to the server's union — both are published
+  // contracts, so a divergence means the SDK and the API disagree about the
+  // same artifact.
+  //  - `malformed_chain`        → a settlement receipt with no `parent_jti`.
+  //  - `parent_not_found`       → the chain dangles, or no parent was supplied.
+  //  - `parent_revoked`         → the parent was withdrawn; the leg it authorized falls with it.
+  //  - `parent_tenant_mismatch` → the chain crosses tenants.
+  | "malformed_chain"
+  | "parent_not_found"
+  | "parent_revoked"
+  | "parent_tenant_mismatch";
 
 /** A JWK Set as published at `/.well-known/jwks.json`. */
 export interface JWKSet {
@@ -74,4 +87,18 @@ export interface VerifyOptions {
    * Combine with `checkRevocation: false` for fully-offline verification.
    */
   jwks?: JWKSet;
+  /**
+   * The mint receipt this settlement receipt chains to, as a compact JWS.
+   *
+   * REQUIRED to verify an `event_type: "call_settlement"` receipt; ignored for
+   * mint receipts. Passed in rather than fetched so verification stays offline —
+   * an `adjuro-audit-packet/2` ZIP ships both `.jws` files side by side, so the
+   * caller already holds it. Fetching the parent would put a network round-trip
+   * (and trust in Adjuro's server) back into the one code path whose entire
+   * purpose is to need neither.
+   *
+   * Its signature is VERIFIED, not merely decoded — see the chain block in
+   * index.ts for why that distinction is load-bearing.
+   */
+  parentJws?: string;
 }
