@@ -10,12 +10,23 @@ import { verifyReceipt } from "adjuro";
 
 const result = await verifyReceipt(receiptJws);
 
-// → { valid: true, kid: "adjuro-root-2026w20",
+// → { valid: true, kid: "adjuro-root-2026w39",
 //      receipt_id: "adj_rcpt_x9k2tqp4...",
+//      attestation_id: "adj_rcpt_x9k2tqp4...",
+//      authorization_window: "closed",   // ← not a failure; see below
+//      authorization_expired_at: "2026-05-20T14:32:23Z",
+//      brand_verified: false,            // ← check this, not just `valid`
+//      trust_tier: "unverified",
 //      issued_at: "2026-05-19T14:32:23Z",
 //      expires_at: "2027-05-19T14:32:23Z",
 //      payload: { agent_id: "adj:7k9n...", scope: ["debt_collection"], ... } }
 ```
+
+> **Two things `valid: true` does not tell you.**
+> **`authorization_window: "closed"`** means the receipt can no longer authorize a *new* call —
+> it says nothing about whether it is still evidence that a past call *was* authorized. It is.
+> **`brand_verified: false`** means the signature is genuine but Adjuro has not verified who the
+> brand is. Trust the asserted brand if and only if `brand_verified === true`.
 
 ## Why this is trustworthy
 
@@ -53,10 +64,36 @@ When `valid` is `false`, **`reason` tells you something a court needs to know.**
 |---|---|---|
 | `signature_invalid` | The cryptography fails | The receipt is **forged or tampered**. It was never genuinely issued by this key. |
 | `revoked` | Signature is **genuine**, but withdrawn | The receipt **was real** and properly signed, then revoked after issuance. `revoked: true` is set, and `kid` + `payload` are present. |
-| `expired` | Signature is **genuine**, past its `exp` | The receipt **was real**, but it is past its validity window. `kid` + `payload` are present. |
+| `expired` | **Only** when you passed `requireUnexpired: true` | You asked to act as a pre-call gate, and this receipt can no longer authorize a new call. Evidence verification never returns this. |
 
-A `revoked` (or `expired`) receipt is evidence that a valid attestation existed and was later
-withdrawn — categorically different from a `signature_invalid` receipt, which is evidence of forgery.
+A `revoked` receipt is evidence that a valid attestation existed and was later withdrawn —
+categorically different from a `signature_invalid` receipt, which is evidence of forgery.
+
+### `exp` is an authorization window, not an expiry on the evidence
+
+**Changed in 2.0.0.** A receipt past its `exp` now verifies `valid: true` and reports
+`authorization_window: "closed"`.
+
+A mint receipt does two jobs. It **authorizes** a call about to be placed — that job expires
+after 24 hours — and it is **evidence** that the call was authorized, which never expires. These
+artifacts are retained seven years to be read in a courtroom, and a fact about the past does not
+stop being true.
+
+Through 1.4.0 only the first reading was implemented, so every receipt older than a day returned
+`{ valid: false, reason: "expired" }` — the same verdict a **forged** signature gets. Anyone who
+verified their own audit packet the next day was told their evidence was void.
+
+If you are running a real-time gate, where a stale receipt genuinely must not license a new call,
+ask for that explicitly:
+
+```js
+await verifyReceipt(jws, { requireUnexpired: true });
+// → { valid: false, reason: "expired", kid, payload }
+```
+
+**Upgrading from 1.x:** if you use `verifyReceipt` to decide whether a call may be placed *right
+now*, add `requireUnexpired: true`. If you use it to check whether a call *was* authorized, change
+nothing — it now answers correctly for receipts older than a day.
 
 Other reasons: `malformed_jws` (not a well-formed three-segment JWS), `alg_unsupported` (header `alg`
 is not `EdDSA`), `unknown_kid` (no published key matches the receipt's `kid`).
@@ -65,28 +102,40 @@ is not `EdDSA`), `unknown_kid` (no published key matches the receipt's `kid`).
 
 ```ts
 verifyReceipt(jws: string, opts?: {
-  baseUrl?: string;          // default "https://api.adjuro.ai"
-  checkRevocation?: boolean; // default true
-  jwks?: JWKSet;             // pre-fetched keys → skip the JWKS fetch
-  parentJws?: string;        // REQUIRED for settlement receipts — see below
+  baseUrl?: string;           // default "https://api.adjuro.ai"
+  checkRevocation?: boolean;  // default true
+  jwks?: JWKSet;              // pre-fetched keys → skip the JWKS fetch
+  requireUnexpired?: boolean; // default false — opt in to pre-call GATE semantics
+  parentJws?: string;         // REQUIRED for settlement receipts — see below
 }): Promise<VerifyResult>
 ```
 
 ```ts
 interface VerifyResult {
-  valid: boolean;
+  valid: boolean;        // signature verified AND not revoked
   reason?: "malformed_jws" | "alg_unsupported" | "unknown_kid"
          | "signature_invalid" | "expired" | "revoked"
          | "malformed_chain" | "parent_not_found"
          | "parent_revoked" | "parent_tenant_mismatch";
   kid?: string;          // signing key id (present once the header parsed)
   receipt_id?: string;   // the adj_rcpt_* id; equals the jti claim
+  attestation_id?: string; // the same id under its current name
+  authorization_window?: "open" | "closed";  // "closed" is NOT a failure
+  authorization_expired_at?: string;         // ISO-8601; omitted while open
+  brand_verified?: boolean; // trust the asserted brand IFF this is true
+  trust_tier?: string;      // display-only; "unverified" when unset
   issued_at?: string;    // ISO-8601
   expires_at?: string;   // ISO-8601
   revoked?: boolean;     // true only on reason:"revoked"
   payload?: object;      // decoded receipt claims (present once the signature verified)
 }
 ```
+
+The result mirrors the server's `POST /v1/verify` success shape with **one deliberate
+difference**: there is no `key_status`. JWKS carries no status field, so an offline verifier
+cannot know whether a key is `active`, `rotating` or `retired`. That is sound rather than a gap —
+a de-listed key stops being published, so the SDK reaches `unknown_kid` exactly where the server
+reports `key_revoked`.
 
 The exact failure-reason set is also exported at runtime as `VERIFY_REASONS`.
 

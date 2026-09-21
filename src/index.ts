@@ -62,13 +62,23 @@ const SETTLEMENT_EVENT_TYPE = "call_settlement";
  * @param jws  The compact JWS receipt string (`header.payload.signature`).
  * @param opts See {@link VerifyOptions}.
  * @returns    A {@link VerifyResult}. `valid: true` means the signature verified
- *             AND the receipt is neither expired nor revoked.
+ *             and the receipt is not revoked. A CLOSED authorization window does
+ *             not make it false — evidence about a call that already happened does
+ *             not expire. See `authorization_window`.
+ *
+ * TRUST RULE — `valid` is SIGNATURE-ONLY. Trust the asserted `brand` if and only
+ * if `brand_verified === true`. A genuine signature on a `brand_verified: false`
+ * receipt means the signature is real but Adjuro has not verified who the brand
+ * is; checking only `valid` is how brand spoofing gets through.
  *
  * @example Online (default) — fetches keys + checks revocation:
  *   const r = await verifyReceipt(jws);
  *
  * @example Fully offline — no network, no trust in Adjuro:
  *   const r = await verifyReceipt(jws, { jwks, checkRevocation: false });
+ *
+ * @example As a pre-call gate, where a stale receipt must not license a new call:
+ *   const r = await verifyReceipt(jws, { requireUnexpired: true });
  */
 export async function verifyReceipt(jws: string, opts: VerifyOptions = {}): Promise<VerifyResult> {
   const baseUrl = opts.baseUrl ?? DEFAULT_BASE_URL;
@@ -81,7 +91,7 @@ export async function verifyReceipt(jws: string, opts: VerifyOptions = {}): Prom
   };
 
   // Steps a–e + result shape: ported verbatim from the server (see core.ts).
-  const result = await verifyCore(jws, jwkLookup);
+  const result = await verifyCore(jws, jwkLookup, { requireUnexpired: opts.requireUnexpired });
 
   // Revocation is checked LAST and only on an otherwise-valid receipt carrying a
   // jti — the same placement and guard as the server's verifyReceiptJws.
@@ -131,7 +141,18 @@ export async function verifyReceipt(jws: string, opts: VerifyOptions = {}): Prom
     // level. A mint receipt carries no `event_type: "call_settlement"` so it never
     // re-enters this branch, but the depth is pinned explicitly rather than left
     // to depend on that.
-    const parent = await verifyReceipt(opts.parentJws, { ...opts, parentJws: undefined });
+    //
+    // `requireUnexpired` is deliberately DROPPED here. The parent is being checked
+    // as evidence that this chain is genuine, not as authorization for a new call —
+    // and a settlement receipt exists only because its parent's call already
+    // happened, so the parent's window is closed essentially by definition.
+    // Propagating the gate flag would make every settlement receipt unverifiable
+    // for a gate caller, which is the original bug wearing a different hat.
+    const parent = await verifyReceipt(opts.parentJws, {
+      ...opts,
+      parentJws: undefined,
+      requireUnexpired: false,
+    });
     if (!parent.valid) {
       return {
         valid: false,

@@ -12,7 +12,11 @@
  *  - `signature_invalid` → the receipt is FORGED or TAMPERED (the crypto fails).
  *  - `revoked`           → the signature is GENUINE, but the receipt was withdrawn
  *                          after issuance. The receipt was real; it is no longer in force.
- *  - `expired`           → the signature is GENUINE, but the receipt is past its `exp`.
+ *  - `expired`           → ONLY returned when the caller passed `requireUnexpired: true`,
+ *                          i.e. it is acting as a pre-call authorization gate. Evidence
+ *                          verification (the default) never returns this: a closed window
+ *                          is reported via `authorization_window` on a SUCCESSFUL result.
+ *                          Changed in 2.0.0 — see `authorization_window`.
  */
 export type VerifyReason =
   | "malformed_jws"
@@ -43,22 +47,63 @@ export interface JWKSet {
 /**
  * The result of verifying a receipt.
  *
- * On success: `{ valid: true, kid, receipt_id, issued_at, expires_at, payload }`
- * — identical to the server's success shape.
+ * On success: `{ valid: true, kid, receipt_id, attestation_id, authorization_window,
+ * authorization_expired_at?, brand_verified, trust_tier, issued_at, expires_at, payload }`
+ * — the server's success shape, with ONE deliberate difference.
+ *
+ * THE ONE DIFFERENCE: the SDK does not return `key_status`. JWKS carries no status
+ * field, so an offline verifier cannot know whether a key is `active`, `rotating`
+ * or `retired`. That is sound rather than a gap — a de-listed key stops being
+ * published, so the SDK reaches `unknown_kid` exactly where the server reports
+ * `key_revoked`. There is no honest way to derive it offline, so it is omitted
+ * rather than guessed.
  *
  * On failure: `{ valid: false, reason, ... }`. `kid` and `payload` are populated
- * when the failure occurred AFTER the signature verified (e.g. `expired`,
- * `revoked`) so callers can still read who signed it and what it said.
+ * when the failure occurred AFTER the signature verified (e.g. `revoked`) so
+ * callers can still read who signed it and what it said.
  */
 export interface VerifyResult {
-  /** `true` only if the signature verified AND the receipt is not expired/revoked. */
+  /** `true` if the signature verified AND the receipt is not revoked. A CLOSED
+   * authorization window does not make this false — see `authorization_window`. */
   valid: boolean;
   /** Present on every failure; absent on success. */
   reason?: VerifyReason;
   /** The signing key id from the JWS header (present once the header parsed). */
   kid?: string;
-  /** The receipt id (`adj_rcpt_*`); equals the `jti` claim. */
+  /** The receipt id (`adj_rcpt_*`); equals the `jti` claim. Same value as
+   * `attestation_id` — both spellings are populated on every success. */
   receipt_id?: string;
+  /** The same id under its current name. Artifacts issued before the rename spell
+   * the claim `receipt_id` in their signed payload, so both fields stay forever. */
+  attestation_id?: string;
+  /**
+   * Whether the 24h authorization window (the `exp` claim) is still open.
+   *
+   * `"closed"` is NOT a failure and never makes `valid` false. A mint receipt
+   * stops authorizing new calls after `exp`, but it never stops being evidence
+   * that the call WAS authorized — and that is what a compliance reader is
+   * checking, years later. Receipts with no `exp` (settlement receipts) report
+   * `"open"`.
+   *
+   * Running a real-time pre-call gate instead of verifying evidence? Pass
+   * `requireUnexpired: true` and a closed window becomes
+   * `{ valid: false, reason: "expired" }`.
+   */
+  authorization_window?: "open" | "closed";
+  /** ISO-8601 instant the authorization window closed; absent while it is open. */
+  authorization_expired_at?: string;
+  /**
+   * Whether Adjuro vouched for the asserted `brand`, from the signed claim.
+   *
+   * `valid` is SIGNATURE-ONLY. Trust the brand if and only if this is `true`. A
+   * genuine signature on a `brand_verified: false` receipt means the signature is
+   * real but Adjuro has not verified who the brand is — checking only `valid` is
+   * exactly how brand spoofing gets through. Fails closed: a missing or
+   * merely-truthy claim reads `false`.
+   */
+  brand_verified?: boolean;
+  /** Display-only trust tier from the signed claim; `"unverified"` when absent. */
+  trust_tier?: string;
   /** ISO-8601 issuance time, from the `issued_at` claim. */
   issued_at?: string;
   /** ISO-8601 expiry time, from the `expires_at` claim. */
@@ -87,6 +132,21 @@ export interface VerifyOptions {
    * Combine with `checkRevocation: false` for fully-offline verification.
    */
   jwks?: JWKSet;
+  /**
+   * Opt in to pre-call GATE semantics: a receipt past its `exp` is rejected with
+   * `reason: "expired"`. Defaults to `false`, which is EVIDENCE semantics — the
+   * signature is what is being checked, and a closed window is reported via
+   * `authorization_window` rather than failing verification.
+   *
+   * Set this ONLY if you are deciding whether a receipt may authorize a call
+   * RIGHT NOW. If you are checking whether a call WAS authorized — an audit, a
+   * compliance review, a courtroom — leave it unset.
+   *
+   * It does not propagate to the parent leg of a settlement chain: that parent is
+   * being checked as evidence that the chain is genuine, not as authorization for
+   * a new call.
+   */
+  requireUnexpired?: boolean;
   /**
    * The mint receipt this settlement receipt chains to, as a compact JWS.
    *
