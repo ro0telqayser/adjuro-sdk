@@ -1,17 +1,17 @@
 {
   "name": "adjuro",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "Independent, offline-capable verifier for Adjuro Ed25519 receipts (JWS / RFC 8037). Verifies signatures locally — never trusts Adjuro's server for the answer.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Adjuro",
-  "homepage": "https://github.com/adjuro/sdk#readme",
+  "homepage": "https://github.com/ro0telqayser/adjuro-sdk#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adjuro/sdk.git"
+    "url": "git+https://github.com/ro0telqayser/adjuro-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/adjuro/sdk/issues"
+    "url": "https://github.com/ro0telqayser/adjuro-sdk/issues"
   },
   "keywords": [
     "adjuro",

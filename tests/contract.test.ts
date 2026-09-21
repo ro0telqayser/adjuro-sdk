@@ -5,10 +5,19 @@ import fixture from "./fixtures/known-receipt.json";
 // These tests PIN the public contract. They are designed to fail loudly the
 // moment a change would break a deployed verifier or diverge from the server.
 
+// WIDENED in 2.0.0. `authorization_expired_at` is NOT here: it is omitted while
+// the authorization window is open (this fixture's `exp` is year-2100), exactly as
+// the server omits it. The comparison below is toStrictEqual, which tells an
+// absent key apart from an undefined one — so this list is the real key set, not
+// an approximation of it.
 const SUCCESS_KEYS = [
   "valid",
   "kid",
   "receipt_id",
+  "attestation_id",
+  "authorization_window",
+  "brand_verified",
+  "trust_tier",
   "issued_at",
   "expires_at",
   "payload",

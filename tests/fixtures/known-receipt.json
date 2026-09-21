@@ -24,6 +24,10 @@
     "valid": true,
     "kid": "adjuro-root-sample",
     "receipt_id": "adj_rcpt_x9k2tqp4f7a3w1n5b8c2d6e3",
+    "attestation_id": "adj_rcpt_x9k2tqp4f7a3w1n5b8c2d6e3",
+    "authorization_window": "open",
+    "brand_verified": false,
+    "trust_tier": "unverified",
     "issued_at": "2025-05-11T21:46:40.000Z",
     "expires_at": "2100-01-01T00:00:00.000Z",
     "payload": {
