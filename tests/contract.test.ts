@@ -18,6 +18,8 @@ const SUCCESS_KEYS = [
   "authorization_window",
   "brand_verified",
   "trust_tier",
+  "brand_domain", // 2.1.0, mirrors POST /v1/verify (adjuro#116)
+  "environment", // 2.1.0, mirrors POST /v1/verify (adjuro#116)
   "issued_at",
   "expires_at",
   "payload",

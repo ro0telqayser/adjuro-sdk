@@ -124,6 +124,8 @@ interface VerifyResult {
   authorization_expired_at?: string;         // ISO-8601; omitted while open
   brand_verified?: boolean; // trust the asserted brand IFF this is true
   trust_tier?: string;      // display-only; "unverified" when unset
+  brand_domain?: string | null;  // the approved domain behind brand_verified:true; else null (2.1.0)
+  environment?: "sandbox" | "live" | null; // issuing tenant's environment; null if absent (2.1.0)
   issued_at?: string;    // ISO-8601
   expires_at?: string;   // ISO-8601
   revoked?: boolean;     // true only on reason:"revoked"

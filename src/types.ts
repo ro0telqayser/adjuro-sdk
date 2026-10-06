@@ -48,7 +48,8 @@ export interface JWKSet {
  * The result of verifying a receipt.
  *
  * On success: `{ valid: true, kid, receipt_id, attestation_id, authorization_window,
- * authorization_expired_at?, brand_verified, trust_tier, issued_at, expires_at, payload }`
+ * authorization_expired_at?, brand_verified, trust_tier, brand_domain, environment, issued_at,
+ * expires_at, payload }`
  * — the server's success shape, with ONE deliberate difference.
  *
  * THE ONE DIFFERENCE: the SDK does not return `key_status`. JWKS carries no status
@@ -104,6 +105,19 @@ export interface VerifyResult {
   brand_verified?: boolean;
   /** Display-only trust tier from the signed claim; `"unverified"` when absent. */
   trust_tier?: string;
+  /**
+   * The approved domain that backs `brand_verified: true` (the signed `brand_domain`
+   * claim). `null` whenever the brand is not verified, and `null` on receipts signed
+   * before October 2026, when the claim did not exist — absence is not a downgrade.
+   * Display-only: the trust decision is still `brand_verified === true`. Added in 2.1.0.
+   */
+  brand_domain?: string | null;
+  /**
+   * The issuing tenant's environment at signing (`"sandbox"` | `"live"`), from the
+   * signed `environment` claim; `null` when absent or any other value. A `"sandbox"`
+   * receipt never carries `brand_verified: true`. Added in 2.1.0.
+   */
+  environment?: "sandbox" | "live" | null;
   /** ISO-8601 issuance time, from the `issued_at` claim. */
   issued_at?: string;
   /** ISO-8601 expiry time, from the `expires_at` claim. */
