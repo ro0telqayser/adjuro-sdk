@@ -3,9 +3,21 @@
 All notable changes to the `adjuro` verifier SDK. Format loosely follows
 [keep-a-changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [2.1.0]
 
-### Notes: issuer-side change, no SDK change required
+### Added
+- `brand_domain` and `environment` on a successful result, so the SDK returns exactly the success
+  keys of the hosted `POST /v1/verify` again (the contract test pins the key set).
+  - `brand_domain`: the signed `brand_domain` claim, reported **only** beside
+    `brand_verified: true`; `null` otherwise.
+  - `environment`: the signed `environment` claim when it is exactly `"sandbox"` or `"live"`;
+    `null` otherwise.
+  - Both are `null` for receipts signed before the claims existed. The verdict on those receipts
+    is unchanged.
+- Additive: no existing field changes, and the trust rule is unchanged — trust the asserted brand
+  if and only if `brand_verified === true`.
+
+### Notes: the issuer-side change that prompted it
 
 - Attestations minted by the Adjuro API from October 2026 carry two additional signed claims:
   - `brand_domain`: the approved domain backing `brand_verified: true`, or `null`.
@@ -18,8 +30,7 @@ All notable changes to the `adjuro` verifier SDK. Format loosely follows
   both new claims are readable from it today. The trust rule is unchanged: trust the asserted
   brand if and only if `brand_verified === true`.
 - Attestations signed before the change carry neither claim; their absence is not a downgrade.
-- A later minor release may surface `brand_domain` and `environment` as first-class result
-  fields. That would be additive.
+- 2.1.0 (above) surfaces both as first-class result fields.
 
 ## [2.0.0]
 

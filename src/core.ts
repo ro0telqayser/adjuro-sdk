@@ -136,6 +136,18 @@ export async function verifyCore(
     // unverified, so a tenant-supplied "yes" can never be coerced into trust.
     brand_verified: payload.brand_verified === true,
     trust_tier: typeof payload.trust_tier === "string" ? payload.trust_tier : "unverified",
+    // 2.1.0 — same rules as the server's POST /v1/verify. Display fields, never trust
+    // inputs. brand_domain only beside brand_verified === true (a domain next to an
+    // unverified brand would read as a trust grant); environment only when exactly
+    // "sandbox" | "live". Both null on receipts signed before the claims existed.
+    brand_domain:
+      payload.brand_verified === true && typeof payload.brand_domain === "string"
+        ? payload.brand_domain
+        : null,
+    environment:
+      payload.environment === "sandbox" || payload.environment === "live"
+        ? payload.environment
+        : null,
     issued_at: typeof payload.issued_at === "string" ? payload.issued_at : undefined,
     expires_at: typeof payload.expires_at === "string" ? payload.expires_at : undefined,
     payload,

@@ -5,7 +5,8 @@
     "server_source": "adjuro/src/lib/verify.ts :: verifyReceiptJws",
     "jose_version": "6.2.3",
     "fixture_kid": "adjuro-root-sample",
-    "note": "Fixed far-future exp (2100) so the receipt never expires; checkRevocation:false reproduces this exactly offline."
+    "note": "Fixed far-future exp (2100) so the receipt never expires; checkRevocation:false reproduces this exactly offline.",
+    "note_2_1_0": "2.1.0: brand_domain and environment added to `expected` by hand, mirroring POST /v1/verify after adjuro#116 (deployed 1098f9a). Both are null because this receipt predates the claims; prod verification of a pre-claim attestation returns exactly that."
   },
   "jws": "eyJhbGciOiJFZERTQSIsImtpZCI6ImFkanVyby1yb290LXNhbXBsZSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkanVyby5haSIsImp0aSI6ImFkal9yY3B0X3g5azJ0cXA0ZjdhM3cxbjViOGMyZDZlMyIsImlhdCI6MTc0NzAwMDAwMCwiZXhwIjo0MTAyNDQ0ODAwLCJpc3N1ZWRfYnkiOiJodHRwczovL2FkanVyby5haSIsInJlY2VpcHRfaWQiOiJhZGpfcmNwdF94OWsydHFwNGY3YTN3MW41YjhjMmQ2ZTMiLCJpc3N1ZWRfYXQiOiIyMDI1LTA1LTExVDIxOjQ2OjQwLjAwMFoiLCJleHBpcmVzX2F0IjoiMjEwMC0wMS0wMVQwMDowMDowMC4wMDBaIiwidGVuYW50X2lkIjoiYWNtZS1jb2xsZWN0aW9ucy1taWQtYXRsYW50aWMiLCJ0cnVzdF9yb290X2lkIjoiYWRqdXJvLXJvb3QtMjAyNncyMCIsImFnZW50X2lkIjoiYWRqOjdrOW4ycDRmOG0xcTV3M3I2dDJ5OHU0aSIsImJyYW5kIjoiQWNtZSBDb2xsZWN0aW9ucyIsImV2ZW50X3R5cGUiOiJ2b2ljZV9jYWxsIiwiY2FsbGVyX251bWJlciI6IisxODAwNTU1MTIxMiIsImNhbGxlZV9oYXNoIjoic2hhMjU2LWhtYWM6YThqMWJ6czljNXkydjdtNnA0bjNmOGQyIiwiY2FtcGFpZ25faWQiOiJhY2N0LXJlY292ZXJ5LXEyLTIwMjYiLCJjb25zZW50X2lkIjoiY3JtLTEyODQ3LWNvbnNlbnQtMjAyNi0wMy0xNCIsInNjb3BlIjpbImRlYnRfY29sbGVjdGlvbiJdLCJqdXJpc2RpY3Rpb24iOiJVUy1DQSIsIm5vbmNlIjoiYTFiMmMzZDRlNWY2MDcxOCJ9.KoWG2TbXtYOC3yJ_w4e8KdHFEaNTAzN2EzqK-MHcuAy03OxjHml4uLbu_ur7gfylykomlTsfVBuEM-8EMJpkCQ",
   "jwks": {
@@ -28,6 +29,8 @@
     "authorization_window": "open",
     "brand_verified": false,
     "trust_tier": "unverified",
+    "brand_domain": null,
+    "environment": null,
     "issued_at": "2025-05-11T21:46:40.000Z",
     "expires_at": "2100-01-01T00:00:00.000Z",
     "payload": {
